@@ -87,7 +87,14 @@ function decrease() {
 	exit 0
 }
 
-function mute() {
+function unmute() {
+	UNMUTE=$(pactl set-sink-mute $(getCurrentSink) 0)
+	if [ $? -ne 0 ]; then
+		error "failed to unmute sink volume"
+	fi
+}
+
+function toggleMute() {
 	MUTE=$(pactl set-sink-mute $(getCurrentSink) toggle)
 	if [ $? -ne 0 ]; then
 		error "failed to mute sink volume"
@@ -100,16 +107,18 @@ command -v pactl &> /dev/null || error "required program 'pactl' not installed"
 
 case "$1" in
 	decrease)
+		unmute
 		decrease
 		;;
 	get)
 		get
 		;;
 	increase)
+		unmute
 		increase
 		;;
 	mute)
-		mute
+		toggleMute
 		;;
 	*)
 		usage
