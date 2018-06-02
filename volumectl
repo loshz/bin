@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+
+function error {
+	echo error: "$1"
+	exit 1
+}
+
+function getCurrentSink() {
+	SINK=$(pacmd list-sinks | awk '/* index:/{print $3}')
+	if [ -z "${SINK}" ]; then
+		error "no sink available"
+	fi
+	echo "${SINK}"
+}
+
+function getCurrentSinkInfo() {
+	SINK_INFO=$(pacmd list-sinks | grep -wA 11 "* index: $(getCurrentSink)")
+	if [ -z "${SINK_INFO}" ]; then
+		error "could not get current sink info"
+	fi
+	echo "${SINK_INFO}"
+}
+
+function getVolume() {
+	VOLUME=$(echo "$(getCurrentSinkInfo)" | grep "volume:" | head -n 1 | awk '{print $5}' | sed 's/[^0-9]//g')
+	if [ -z "${VOLUME}" ]; then
+		error "could not get current sink volume"
+	fi
+	echo "${VOLUME}"
+}
+
+function getMute() {
+	MUTE=$(echo "$(getCurrentSinkInfo)" | grep "muted" | awk '{print $2}')
+	if [ -z "${MUTE}" ]; then
+		error "could not get current sink mute status"
+	fi
+	echo "${MUTE}"
+}
+
+function usage() {
+	echo "Usage: $0 [OPTION]..."
+	echo "Control and get the volume of the current sink."
+	echo ""
+	echo "Available OPTIONs:"
+	echo "  get         get the volume of the current sink."
+	echo "  increase    increase the volume of the current sink +10%"
+	echo "  decrease    decrease the volume of the current sink -10%"
+	echo "  mute        toggle the volume of the current sink"
+	exit 0
+}
+
+function get() {
+	MUTE=$(getMute)
+	if [ "${MUTE}" == "yes" ]; then
+		echo "MUTE"
+		exit 0
+	fi
+	echo "$(getVolume)%"
+	exit 0
+}
+
+function increase() {
+	VOLUME=$(getVolume)
+	if [ "${VOLUME}" -gt 90 ]; then
+		INC=$(pactl set-sink-volume $(getCurrentSink) 100%)
+	else
+		INC=$(pactl set-sink-volume $(getCurrentSink) +10%)
+	fi
+	
+	if [ $? -ne 0 ]; then
+		error "failed to increase sink volume"
+	fi
+	exit 0
+}
+
+function decrease() {
+	VOLUME=$(getVolume)
+	if [ "${VOLUME}" -lt 10 ]; then
+		INC=$(pactl set-sink-volume $(getCurrentSink) 0%)
+	else
+		INC=$(pactl set-sink-volume $(getCurrentSink) -10%)
+	fi
+	
+	if [ $? -ne 0 ]; then
+		error "failed to decrease sink volume"
+	fi
+	exit 0
+}
+
+function mute() {
+	MUTE=$(pactl set-sink-mute $(getCurrentSink) toggle)
+	if [ $? -ne 0 ]; then
+		error "failed to mute sink volume"
+	fi
+	exit 0
+}
+
+command -v pacmd &> /dev/null || error "required program 'pacmd' not installed"
+command -v pactl &> /dev/null || error "required program 'pactl' not installed"
+
+case "$1" in
+	decrease)
+		decrease
+		;;
+	get)
+		get
+		;;
+	increase)
+		increase
+		;;
+	mute)
+		mute
+		;;
+	*)
+		usage
+		;;
+esac
