@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
+set -o errexit
+
 function error {
 	echo error: "$1"
 	exit 1
 }
 
-function getCurrentSink() {
+function getCurrentSink {
 	SINK=$(pacmd list-sinks | awk '/* index:/{print $3}')
 	if [ -z "${SINK}" ]; then
 		error "no sink available"
@@ -13,7 +15,7 @@ function getCurrentSink() {
 	echo "${SINK}"
 }
 
-function getCurrentSinkInfo() {
+function getCurrentSinkInfo {
 	SINK_INFO=$(pacmd list-sinks | grep -wA 11 "* index: $(getCurrentSink)")
 	if [ -z "${SINK_INFO}" ]; then
 		error "could not get current sink info"
@@ -21,7 +23,7 @@ function getCurrentSinkInfo() {
 	echo "${SINK_INFO}"
 }
 
-function getVolume() {
+function getVolume {
 	VOLUME=$(echo "$(getCurrentSinkInfo)" | grep "volume:" | head -n 1 | awk '{print $5}' | sed 's/[^0-9]//g')
 	if [ -z "${VOLUME}" ]; then
 		error "could not get current sink volume"
@@ -29,7 +31,7 @@ function getVolume() {
 	echo "${VOLUME}"
 }
 
-function getMute() {
+function getMute {
 	MUTE=$(echo "$(getCurrentSinkInfo)" | grep "muted" | awk '{print $2}')
 	if [ -z "${MUTE}" ]; then
 		error "could not get current sink mute status"
@@ -37,7 +39,7 @@ function getMute() {
 	echo "${MUTE}"
 }
 
-function usage() {
+function usage {
 	echo "Usage: $0 [OPTION]..."
 	echo "Control and get the volume of the current sink."
 	echo ""
@@ -49,7 +51,7 @@ function usage() {
 	exit 0
 }
 
-function get() {
+function get {
 	MUTE=$(getMute)
 	if [ "${MUTE}" == "yes" ]; then
 		echo "MUTE"
@@ -59,7 +61,7 @@ function get() {
 	exit 0
 }
 
-function increase() {
+function increase {
 	VOLUME=$(getVolume)
 	if [ "${VOLUME}" -gt 90 ]; then
 		INC=$(pactl set-sink-volume $(getCurrentSink) 100%)
@@ -73,7 +75,7 @@ function increase() {
 	exit 0
 }
 
-function decrease() {
+function decrease {
 	VOLUME=$(getVolume)
 	if [ "${VOLUME}" -lt 10 ]; then
 		INC=$(pactl set-sink-volume $(getCurrentSink) 0%)
@@ -87,14 +89,14 @@ function decrease() {
 	exit 0
 }
 
-function unmute() {
+function unmute {
 	UNMUTE=$(pactl set-sink-mute $(getCurrentSink) 0)
 	if [ $? -ne 0 ]; then
 		error "failed to unmute sink volume"
 	fi
 }
 
-function toggleMute() {
+function toggleMute {
 	MUTE=$(pactl set-sink-mute $(getCurrentSink) toggle)
 	if [ $? -ne 0 ]; then
 		error "failed to mute sink volume"
