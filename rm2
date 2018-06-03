@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -o errexit
+
+read -p "Confirm [y/N]: " CONFIRM
+
+if [ "${CONFIRM}" != "y" ]; then
+	exit 1
+fi
+
+rm $@
+exit $?
