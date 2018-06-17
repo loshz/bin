@@ -40,7 +40,7 @@ function getMute {
 }
 
 function usage {
-	echo "Usage: $0 [OPTION]..."
+	echo "Usage: $(basename $0) [OPTION]..."
 	echo "Control and get the volume of the current sink."
 	echo ""
 	echo "Available OPTIONs:"
