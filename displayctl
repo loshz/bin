@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+function error {
+	echo error: "$1"
+	exit 1
+}
+
+function usage {
+	echo "Usage: $(basename $0) [OPTION]..."
+	echo "Control internal and external display settings."
+	echo ""
+	echo "Available OPTIONs:"
+	echo "  dpi         set dpi depending on current monitor."
+	echo "  primary     toggle the primary monitor [on|off]."
+	exit 0
+}
+
+function dpi {
+	HDMI=$(xrandr | grep -q "HDMI-.* connected")
+	if [ $? -ne 0 ]; then
+		xrandr --dpi 144
+	else
+		xrandr --dpi 96
+	fi
+}
+
+function primary {
+	PRIMARY=$(xrandr | grep "primary")
+	if [ $? -ne 0 ]; then
+		error "could not determine primary display"
+	fi
+
+	PRIMARY=$(echo ${PRIMARY} | awk '{print $1}')
+	OFF=$(xrandr | grep -q "${PRIMARY} connected primary [0-9]")
+	if [ $? -ne 0 ]; then
+		HDMI=$(xrandr | grep "HDMI-.* connected" | awk '{print $1}')
+		xrandr --output ${PRIMARY} --auto --left-of ${HDMI} --primary
+	else
+		xrandr --output ${PRIMARY} --off
+	fi
+}
+
+command -v xrandr &> /dev/null || error "required program 'xrandr' not installed"
+
+case "$1" in
+	dpi)
+		dpi
+		;;
+	primary)
+		primary
+		;;
+	*)
+		usage
+		;;
+esac
