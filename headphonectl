@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+function error {
+	echo error: "$1"
+	exit 1
+}
+
+function usage {
+	echo "Usage: $(basename $0) [OPTION]..."
+	echo "Control headphone settings."
+	echo ""
+	echo "Available OPTIONs:"
+	echo "  connnect       start bluetooth service and connect headphones."
+	echo "  disconnect     disconnect headphones and stop bluetooth service."
+	exit 0
+}
+
+command -v bluetoothctl &> /dev/null || error "required program 'bluetoothctl' not installed"
+
+function connect {
+	BLUETOOTH=$(systemctl is-active bluetooth)
+	if [ $? -ne 0 ]; then
+		BLUETOOTH=$(systemctl start bluetooth)
+		if [ $? -ne 0 ]; then
+			error "failed to start bluetooth service"
+		fi
+	fi
+
+	POWER=$(bluetoothctl power on)
+	if [ $? -ne 0 ]; then
+		error "failed to power on bluetooth"
+	fi
+
+	DEVICES=$(bluetoothctl paired-devices)
+	if [ $? -ne 0 ]; then
+		error "failed to get paired bluetooth devices"
+	fi
+
+	DEVICE=$(echo ${DEVICES} | head -n 1 | awk '{print $2}')
+
+	CONNECT=$(bluetoothctl connect ${DEVICE})
+	if [ $? -ne 0 ]; then
+		error "failed to connect to bluetooth device: ${DEVICE}"
+	fi
+}
+
+function disconnect {
+	BLUETOOTH=$(systemctl stop bluetooth)
+	if [ $? -ne 0 ]; then
+		error "failed to stop bluetooth service"
+	fi
+}
+
+case "$1" in
+	connect)
+		connect
+		;;
+	disconnect)
+		disconnect
+		;;
+	*)
+		usage
+		;;
+esac
