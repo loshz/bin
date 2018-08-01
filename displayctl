@@ -16,7 +16,7 @@ function usage {
 }
 
 function dpi {
-	HDMI=$(xrandr | grep -q "HDMI-.* connected")
+	EXTERNAL=$(xrandr | grep -q "connected [0-9]")
 	if [ $? -ne 0 ]; then
 		xrandr --dpi 144
 	else
@@ -33,8 +33,8 @@ function primary {
 	PRIMARY=$(echo ${PRIMARY} | awk '{print $1}')
 	OFF=$(xrandr | grep -q "${PRIMARY} connected primary [0-9]")
 	if [ $? -ne 0 ]; then
-		HDMI=$(xrandr | grep "HDMI-.* connected" | awk '{print $1}')
-		xrandr --output ${PRIMARY} --auto --left-of ${HDMI} --primary
+		EXTERNAL=$(xrandr | grep "connected [0-9]" | awk '{print $1}')
+		xrandr --output ${PRIMARY} --auto --left-of ${EXTERNAL} --primary
 	else
 		xrandr --output ${PRIMARY} --off
 	fi
