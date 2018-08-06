@@ -34,7 +34,11 @@ function primary {
 	OFF=$(xrandr | grep -q "${PRIMARY} connected primary [0-9]")
 	if [ $? -ne 0 ]; then
 		EXTERNAL=$(xrandr | grep "connected [0-9]" | awk '{print $1}')
-		xrandr --output ${PRIMARY} --auto --left-of ${EXTERNAL} --primary
+		if [ $? -ne 0 ]; then
+			xrandr --output ${PRIMARY} --auto --left-of ${EXTERNAL} --primary
+		else
+			xrandr --output ${PRIMARY} --auto
+		fi
 	else
 		xrandr --output ${PRIMARY} --off
 	fi
