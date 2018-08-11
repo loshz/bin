@@ -54,7 +54,7 @@ function usage {
 function get {
 	MUTE=$(getMute)
 	if [ "${MUTE}" == "yes" ]; then
-		echo "MUTE"
+		echo "mute"
 		exit 0
 	fi
 	echo "$(getVolume)%"
