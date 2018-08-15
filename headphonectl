@@ -20,7 +20,7 @@ command -v bluetoothctl &> /dev/null || error "required program 'bluetoothctl' n
 function connect {
 	BLUETOOTH=$(systemctl is-active bluetooth)
 	if [ $? -ne 0 ]; then
-		BLUETOOTH=$(systemctl start bluetooth)
+		BLUETOOTH=$(sudo systemctl start bluetooth)
 		if [ $? -ne 0 ]; then
 			error "failed to start bluetooth service"
 		fi
@@ -45,7 +45,7 @@ function connect {
 }
 
 function disconnect {
-	BLUETOOTH=$(systemctl stop bluetooth)
+	BLUETOOTH=$(sudo systemctl stop bluetooth)
 	if [ $? -ne 0 ]; then
 		error "failed to stop bluetooth service"
 	fi
