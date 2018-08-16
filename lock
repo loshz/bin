@@ -3,4 +3,4 @@
 # requires i3lock package
 command -v i3lock &> /dev/null || exit 1
 
-i3lock -e -c 8E9EAB
+i3lock -e -c 7F8FA6
