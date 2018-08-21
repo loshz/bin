@@ -16,7 +16,7 @@ function usage {
 }
 
 function dpi {
-	EXTERNAL=$(xrandr | grep -q "connected [0-9]")
+	EXTERNAL=$(xrandr | grep -qw "connected [0-9]")
 	if [ $? -ne 0 ]; then
 		xrandr --dpi 144
 	else
@@ -25,22 +25,27 @@ function dpi {
 }
 
 function primary {
-	PRIMARY=$(xrandr | grep "primary")
-	if [ $? -ne 0 ]; then
+	PRIMARY=$(xrandr | grep "primary" | awk '{print $1}')
+	if [ -z "${PRIMARY}" ]; then
 		error "could not determine primary display"
 	fi
 
-	PRIMARY=$(echo ${PRIMARY} | awk '{print $1}')
+	# check for an external display
+	EXTERNAL=$(xrandr | grep -w "connected [0-9]" | awk '{print $1}')
+
+	# check if the primary display is off
 	OFF=$(xrandr | grep -q "${PRIMARY} connected primary [0-9]")
 	if [ $? -ne 0 ]; then
-		EXTERNAL=$(xrandr | grep "connected [0-9]" | awk '{print $1}')
-		if [ $? -ne 0 ]; then
-			xrandr --output ${PRIMARY} --auto --left-of ${EXTERNAL} --primary
+		if [ -z "${EXTERNAL}" ]; then
+			xrandr --output ${PRIMARY} --auto --primary
 		else
-			xrandr --output ${PRIMARY} --auto
+			xrandr --output ${PRIMARY} --auto --left-of ${EXTERNAL} --primary
 		fi
 	else
-		xrandr --output ${PRIMARY} --off
+		# only turn off primary display if external is connected
+		if [ ! -z "${EXTERNAL}" ]; then
+			xrandr --output ${PRIMARY} --off
+		fi
 	fi
 }
 
