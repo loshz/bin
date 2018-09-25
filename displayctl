@@ -16,11 +16,17 @@ function usage {
 }
 
 function dpi {
-	EXTERNAL=$(xrandr | grep -qw "connected [0-9]")
+	EXTERNAL=$(xrandr | grep -q "[0-9] connected [0-9]")
 	if [ $? -ne 0 ]; then
-		xrandr --dpi 144
+		XDPI=144
 	else
-		xrandr --dpi 96
+		XDPI=96
+	fi
+
+	if [ "$1" == "print" ]; then
+		echo ${XDPI}
+	else
+		xrandr --dpi ${XDPI}
 	fi
 }
 
@@ -31,7 +37,7 @@ function primary {
 	fi
 
 	# check for an external display
-	EXTERNAL=$(xrandr | grep -w "connected [0-9]" | awk '{print $1}')
+	EXTERNAL=$(xrandr | grep "[0-9] connected [0-9]" | awk '{print $1}')
 
 	# check if the primary display is off
 	OFF=$(xrandr | grep -q "${PRIMARY} connected primary [0-9]")
@@ -53,7 +59,7 @@ command -v xrandr &> /dev/null || error "required program 'xrandr' not installed
 
 case "$1" in
 	dpi)
-		dpi
+		dpi $2
 		;;
 	primary)
 		primary
