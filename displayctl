@@ -10,7 +10,7 @@ function usage {
 	echo "Control internal and external display settings."
 	echo ""
 	echo "Available OPTIONs:"
-	echo "  dpi         set dpi depending on current monitor."
+	echo "  dpi         print dpi depending on current monitor."
 	echo "  primary     toggle the primary monitor [on|off]."
 	exit 0
 }
@@ -22,12 +22,7 @@ function dpi {
 	else
 		XDPI=96
 	fi
-
-	if [ "$1" == "print" ]; then
-		echo ${XDPI}
-	else
-		xrandr --dpi ${XDPI}
-	fi
+	echo ${XDPI}
 }
 
 function primary {
@@ -59,7 +54,7 @@ command -v xrandr &> /dev/null || error "required program 'xrandr' not installed
 
 case "$1" in
 	dpi)
-		dpi $2
+		dpi
 		;;
 	primary)
 		primary
