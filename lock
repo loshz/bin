@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-# requires i3lock package
-command -v i3lock &> /dev/null || exit 1
-
-i3lock -e -c 757F9A
