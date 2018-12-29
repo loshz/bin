@@ -2,7 +2,7 @@
 
 set -o errexit
 
-read -p "Confirm [y/N]: " CONFIRM
+read -p ":: Confirm [y/N]: " CONFIRM
 
 if [ "${CONFIRM}" != "y" ]; then
 	exit 1

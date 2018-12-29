@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+
+function error {
+	echo "ERROR: $1"
+	exit 1
+}
+
+function cleanup {
+	rm -r $1
+}
+
+function confirm {
+	echo ""
+	read -p ":: Proceed? [y/N]: " CONFIRM
+	if [ "${CONFIRM}" != "y" ]; then
+		exit 1
+	fi
+}
+
+function usage {
+	echo "Usage: $(basename $0) [BACKUP PATH] [FILENAME]"
+	echo "Backup files to an externally mounted volume."
+	echo ""
+	echo "Required params:"
+	echo "  [BACKUP PATH]    Full path to externally mounted volume (e.g. /mnt/backup)"
+	echo ""
+	echo "Optional params:"
+	echo "  [FILENAME]       Name of backup file (default: backup-[HOSTNAME]-[TIMESTAMP].tar.gz"
+	exit 127
+}
+
+command -v rsync >/dev/null 2>&1 || error "rsync not installed"
+command -v tar >/dev/null 2>&1 || error "tar not installed"
+
+if [[ $EUID > 0 ]]; then
+	error "$(basename $0) must be ran as root"
+fi
+
+BACKUP_PATH=$1
+BACKUP_FILE=$2
+
+# Check external volume path is set
+if [[ -z ${BACKUP_PATH} ]]; then
+	usage
+fi
+
+# Check external volume path exists
+if [[ ! -d "${BACKUP_PATH}" ]]; then
+	error "${BACKUP_PATH}: No such file or directory"
+fi
+
+# Check for user specified backup filename
+if [[ -z ${BACKUP_FILE} ]]; then
+	BACKUP_FILE="$HOSTNAME-$(date "+%Y%m%d-%H%M%S")"
+fi
+
+cd ${BACKUP_PATH}
+
+# Check backup file does not already exist
+if [[ -f "${BACKUP_FILE}" ]]; then
+	error "backup ${BACKUP_FILE} already exists"
+fi
+
+echo "Will create backup ${BACKUP_PATH}/${BACKUP_FILE}.tar.gz"
+confirm
+
+# Create backup dir
+mkdir ${BACKUP_FILE} || error "failed to create temp backup dir: ${BACKUP_FILE}"
+
+echo -e "\n:: Backing up files"
+DIRS=(/home /etc /usr/local/bin)
+for dir in ${DIRS[@]}; do
+	echo -ne "$dir... "
+
+	# Copy files to backup location
+	rsync -aqE --relative --exclude ".cache" --exclude "lost+found" $dir ${BACKUP_FILE}
+	if [ $? -ne 0 ]; then
+		# If there was an error, confirm before continuing
+		confirm
+		continue
+	fi
+	echo -ne "ok\r\n"
+done
+
+# Archive backup dir
+echo -e "\n:: Creating archive"
+echo -ne "tar... "
+tar -zcf ${BACKUP_FILE}.tar.gz ${BACKUP_FILE}
+if [ $? -ne 0 ]; then
+	cleanup ${BACKUP_FILE}
+	error "failed to create archive: ${BACKUP_FILE}.tar.gz"
+fi
+echo -ne "ok\r\n"
+
+# Remove backup dir
+cleanup ${BACKUP_FILE}
+
+echo -e "\nBackup completed"
