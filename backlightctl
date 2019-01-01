@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+
+set -o errexit
+
+function error {
+	echo ERROR: "$1"
+	exit 1
+}
+
+function usage {
+	echo "Usage: $(basename $0) [OPTION]..."
+	echo "Control the brightness of intel_backlight."
+	echo ""
+	echo "Available OPTIONs:"
+	echo "  inc    increase the brightness +20%"
+	echo "  dec    decrease the brightness -20%"
+	exit 0
+}
+
+function increase {
+	local new=$(($(current_brightness) + $(brightness_increment)))
+	local max=$(max_brightness)
+
+	if [[ ${new} -gt ${max} ]]; then
+		set_brightness ${max}
+		exit 0
+	fi
+	
+	set_brightness ${new}
+	exit 0
+}
+
+function decrease {
+	local new=$(($(current_brightness) - $(brightness_increment)))
+
+	if [[ ${new} -lt 0 ]]; then
+		set_brightness 0
+		exit 0
+	fi
+
+	set_brightness ${new}
+	exit 0
+}
+
+function set_brightness {
+	echo $1 > /sys/class/backlight/intel_backlight/brightness
+	if [ $? -ne 0 ]; then
+		error: "failed to set current brightness"
+	fi
+	exit 0
+}
+
+function current_brightness {
+	local brightness=$(sudo cat /sys/class/backlight/intel_backlight/brightness)
+	if [ $? -ne 0 ]; then
+		error: "failed to get current brightness"
+	fi
+	echo $brightness
+}
+
+function max_brightness {
+	local max=$(sudo cat /sys/class/backlight/intel_backlight/max_brightness)
+	if [ $? -ne 0 ]; then
+		error: "failed to get max_brightness"
+	fi
+	echo $max
+}
+
+function brightness_increment {
+	echo $((($(max_brightness) / 10) * 2))
+}
+
+function check_root {
+	if [[ $EUID > 0 ]]; then
+		error "$(basename $0) must be ran as root"
+	fi
+}
+
+case "$1" in
+	dec)
+		check_root
+		decrease
+		;;
+	inc)
+		check_root
+		increase
+		;;
+	*)
+		usage
+		;;
+esac

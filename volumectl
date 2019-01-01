@@ -3,7 +3,7 @@
 set -o errexit
 
 function error {
-	echo error: "$1"
+	echo ERROR: "$1"
 	exit 1
 }
 
@@ -108,14 +108,14 @@ command -v pacmd &> /dev/null || error "required program 'pacmd' not installed"
 command -v pactl &> /dev/null || error "required program 'pactl' not installed"
 
 case "$1" in
-	decrease)
+	dec)
 		unmute
 		decrease
 		;;
 	get)
 		get
 		;;
-	increase)
+	inc)
 		unmute
 		increase
 		;;
