@@ -11,7 +11,7 @@ function cleanup {
 
 function confirm {
 	echo ""
-	read -p ":: Proceed? [y/N]: " CONFIRM
+	read -p ":: Proceed? [y/N] " CONFIRM
 	if [ "${CONFIRM}" != "y" ]; then
 		exit 1
 	fi
