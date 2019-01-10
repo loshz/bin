@@ -31,10 +31,11 @@ function increase {
 }
 
 function decrease {
-	local new=$(($(current_brightness) - $(brightness_increment)))
+	local inc=$(brightness_increment)
+	local new=$(($(current_brightness) - ${inc}))
 
-	if [[ ${new} -lt 0 ]]; then
-		set_brightness 0
+	if [[ ${new} -lt ${inc} ]]; then
+		set_brightness ${inc}
 		exit 0
 	fi
 
