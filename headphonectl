@@ -51,12 +51,24 @@ function disconnect {
 	fi
 }
 
+function toggle {
+	BLUETOOTH=$(systemctl is-active bluetooth)
+	if [ $? -ne 0 ]; then
+		connect
+	else
+		disconnect
+	fi
+}
+
 case "$1" in
 	connect)
 		connect
 		;;
 	disconnect)
 		disconnect
+		;;
+	toggle)
+		toggle
 		;;
 	*)
 		usage
