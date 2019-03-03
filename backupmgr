@@ -68,7 +68,7 @@ confirm
 mkdir ${BACKUP_FILE} || error "failed to create temp backup dir: ${BACKUP_FILE}"
 
 echo -e "\n:: Backing up files"
-DIRS=(/home /etc /usr/local/bin)
+DIRS=(/home /etc /usr /boot)
 for dir in ${DIRS[@]}; do
 	echo -ne "$dir... "
 
@@ -95,4 +95,4 @@ echo -ne "ok\r\n"
 # Remove backup dir
 cleanup ${BACKUP_FILE}
 
-echo -e "\nBackup completed"
+echo -e "\nBackup complete"
