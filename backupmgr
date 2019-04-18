@@ -70,7 +70,7 @@ mkdir ${BACKUP_FILE} || error "failed to create temp backup dir: ${BACKUP_FILE}"
 echo -e "\n:: Backing up files"
 DIRS=(/home /etc /usr /boot)
 for dir in ${DIRS[@]}; do
-	echo -ne "$dir... "
+	echo -ne "$dir..."
 
 	# Copy files to backup location
 	rsync -aqE --relative --exclude ".cache" --exclude "lost+found" $dir ${BACKUP_FILE}
@@ -82,9 +82,15 @@ for dir in ${DIRS[@]}; do
 	echo -ne "ok\r\n"
 done
 
+echo -e "\n:: Running tasks"
+# Export list of installed packages
+echo -ne "Exporting pkglist..."
+pacman -Qqet > ${BACKUP_FILE}/pkglist.txt
+echo -ne "ok\r\n"
+
 # Archive backup dir
 echo -e "\n:: Creating archive"
-echo -ne "tar... "
+echo -ne "tar..."
 tar -zcf ${BACKUP_FILE}.tar.gz ${BACKUP_FILE}
 if [ $? -ne 0 ]; then
 	cleanup ${BACKUP_FILE}
