@@ -6,24 +6,22 @@ function error {
 }
 
 function usage {
-	echo "Usage: $(basename $0) [OPTION]..."
+	echo "Usage: $(basename $0) [OPTION]"
 	echo "Control headphone settings."
 	echo ""
-	echo "Available OPTIONs:"
+	echo "OPTIONS"
 	echo "  connnect       start bluetooth service and connect headphones."
 	echo "  disconnect     disconnect headphones and stop bluetooth service."
+	echo "  toggle         toggle headphone connection based on bluetooth service."
 	exit 0
 }
 
 command -v bluetoothctl &> /dev/null || error "required program 'bluetoothctl' not installed"
 
 function connect {
-	BLUETOOTH=$(systemctl is-active bluetooth)
+	BLUETOOTH=$(sudo systemctl start bluetooth)
 	if [ $? -ne 0 ]; then
-		BLUETOOTH=$(sudo systemctl start bluetooth)
-		if [ $? -ne 0 ]; then
-			error "failed to start bluetooth service"
-		fi
+		error "failed to start bluetooth service"
 	fi
 
 	POWER=$(bluetoothctl power on)
