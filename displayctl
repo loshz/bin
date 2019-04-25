@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
 
+set -o errexit
+
+command -v xrandr &> /dev/null || error "required program 'xrandr' not installed"
+
 function error {
 	echo ERROR: "$1"
 	exit 1
 }
 
 function usage {
-	echo "Usage: $(basename $0) [OPTION]..."
+	echo "Usage: $(basename $0) [OPTION]"
 	echo "Control internal and external display settings."
 	echo ""
-	echo "Available OPTIONs:"
+	echo "OPTIONS:"
 	echo "  dpi         print dpi depending on current monitor."
 	echo "  primary     toggle the primary monitor [on|off]."
+	echo "  list        list currently connected displays."
 	exit 0
 }
 
@@ -50,7 +55,11 @@ function primary {
 	fi
 }
 
-command -v xrandr &> /dev/null || error "required program 'xrandr' not installed"
+function list {
+	for m in $(xrandr | grep -E "[0-9] connected (primary )?[0-9]" | awk '{print $1}'); do
+		echo $m
+	done
+}
 
 case "$1" in
 	dpi)
@@ -58,6 +67,9 @@ case "$1" in
 		;;
 	primary)
 		primary
+		;;
+	list)
+		list
 		;;
 	*)
 		usage
