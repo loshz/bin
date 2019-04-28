@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -o errexit
-
 command -v xrandr &> /dev/null || error "required program 'xrandr' not installed"
 
 function error {
