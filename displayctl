@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-command -v xrandr &> /dev/null || error "required program 'xrandr' not installed"
-
 function error {
 	echo ERROR: "$1"
 	exit 1
@@ -11,11 +9,11 @@ function usage {
 	echo "Usage: $(basename $0) [OPTION]"
 	echo "Control internal and external display settings."
 	echo ""
-	echo "OPTIONS:"
+	echo "OPTIONS"
 	echo "  dpi         print dpi depending on current monitor."
 	echo "  primary     toggle the primary monitor [on|off]."
 	echo "  list        list currently connected displays."
-	exit 0
+	exit 1
 }
 
 function dpi {
@@ -58,6 +56,8 @@ function list {
 		echo $m
 	done
 }
+
+command -v xrandr &> /dev/null || error "required program 'xrandr' not installed"
 
 case "$1" in
 	dpi)

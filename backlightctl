@@ -8,13 +8,13 @@ function error {
 }
 
 function usage {
-	echo "Usage: $(basename $0) [OPTION]..."
+	echo "Usage: $(basename $0) [OPTION]"
 	echo "Control the brightness of intel_backlight."
 	echo ""
-	echo "Available OPTIONs:"
+	echo "OPTIONS"
 	echo "  inc    increase the brightness +20%"
 	echo "  dec    decrease the brightness -20%"
-	exit 0
+	exit 1
 }
 
 function increase {

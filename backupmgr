@@ -26,7 +26,7 @@ function usage {
 	echo ""
 	echo "Optional params:"
 	echo "  [FILENAME]       Name of backup file (default: backup-[HOSTNAME]-[TIMESTAMP].tar.gz"
-	exit 127
+	exit 1
 }
 
 command -v rsync >/dev/null 2>&1 || error "rsync not installed"

@@ -13,10 +13,8 @@ function usage {
 	echo "  connnect       start bluetooth service and connect headphones."
 	echo "  disconnect     disconnect headphones and stop bluetooth service."
 	echo "  toggle         toggle headphone connection based on bluetooth service."
-	exit 0
+	exit 1
 }
-
-command -v bluetoothctl &> /dev/null || error "required program 'bluetoothctl' not installed"
 
 function connect {
 	BLUETOOTH=$(sudo systemctl start bluetooth)
@@ -57,6 +55,8 @@ function toggle {
 		disconnect
 	fi
 }
+
+command -v bluetoothctl &> /dev/null || error "required program 'bluetoothctl' not installed"
 
 case "$1" in
 	connect)

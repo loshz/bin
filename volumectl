@@ -48,7 +48,7 @@ function usage {
 	echo "  increase    increase the volume of the current sink +10%"
 	echo "  decrease    decrease the volume of the current sink -10%"
 	echo "  mute        toggle the volume of the current sink"
-	exit 0
+	exit 1
 }
 
 function get {
