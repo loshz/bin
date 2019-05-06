@@ -1,0 +1,5 @@
+# vpnctl(1) completion                                       -*- shell-script -*-
+
+complete -W "start stop list" vpnctl
+
+# ex: filetype=sh

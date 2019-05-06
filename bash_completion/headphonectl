@@ -1,0 +1,5 @@
+# headphonectl(1) completion                                 -*- shell-script -*-
+
+complete -W "connect disconnect toggle" headphonectl
+
+# ex: filetype=sh

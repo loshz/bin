@@ -1,0 +1,5 @@
+# volumectl(1) completion                                    -*- shell-script -*-
+
+complete -W "dec decrease inc increase get mute" volumectl
+
+# ex: filetype=sh

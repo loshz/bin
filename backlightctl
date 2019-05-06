@@ -78,11 +78,11 @@ function check_root {
 }
 
 case "$1" in
-	dec)
+	dec|decrease)
 		check_root
 		decrease
 		;;
-	inc)
+	inc|increase)
 		check_root
 		increase
 		;;

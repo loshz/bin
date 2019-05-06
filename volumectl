@@ -96,7 +96,7 @@ function unmute {
 	fi
 }
 
-function toggleMute {
+function toggle_mute {
 	MUTE=$(pactl set-sink-mute $(getCurrentSink) toggle)
 	if [ $? -ne 0 ]; then
 		error "failed to mute sink volume"
@@ -108,19 +108,19 @@ command -v pacmd &> /dev/null || error "required program 'pacmd' not installed"
 command -v pactl &> /dev/null || error "required program 'pactl' not installed"
 
 case "$1" in
-	dec)
+	dec|decrease)
 		unmute
 		decrease
 		;;
 	get)
 		get
 		;;
-	inc)
+	inc|increase)
 		unmute
 		increase
 		;;
 	mute)
-		toggleMute
+		toggle_mute
 		;;
 	*)
 		usage

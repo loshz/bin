@@ -1,0 +1,5 @@
+# displayctl(1) completion                                   -*- shell-script -*-
+
+complete -W "dpi primary list" displayctl
+
+# ex: filetype=sh

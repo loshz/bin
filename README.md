@@ -8,4 +8,14 @@ A collection of scripts used across my Linux machines.
 - `headphonectl`: control headphone settings.
 - `rm2`: confirm remove.
 - `volumectl`: control the volume of the currently active sink.
-- `volumectl`: control openvpn client profiles.
+- `vpnctl`: control openvpn client profiles.
+
+
+## Bash Completion
+
+Basic completion files can be found in the `bash_completion` dir. In order to install them, copy or link each file to location of your choice, for example:
+
+- `/etc/bash_completion.d/`
+- `~/.bash_completion.d/`
+
+**Note:** The files in this folder must be sourced in your `.bashrc` or `.bash_profile` etc.

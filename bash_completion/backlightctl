@@ -1,0 +1,5 @@
+# backlightctl(1) completion                                 -*- shell-script -*-
+
+complete -W "dec decrease inc increase" backlightctl
+
+# ex: filetype=sh
