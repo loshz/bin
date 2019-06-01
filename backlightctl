@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -o errexit
-
 function error {
 	echo ERROR: "$1"
 	exit 1
@@ -12,8 +10,9 @@ function usage {
 	echo "Control the brightness of intel_backlight."
 	echo ""
 	echo "OPTIONS"
-	echo "  inc    increase the brightness +20%"
-	echo "  dec    decrease the brightness -20%"
+	echo "  inc, increase    increase the brightness +20%"
+	echo "  dec, decrease    decrease the brightness -20%"
+	echo "  current          get current brightness percentage"
 	exit 1
 }
 
@@ -52,7 +51,7 @@ function set_brightness {
 }
 
 function current_brightness {
-	local brightness=$(sudo cat /sys/class/backlight/intel_backlight/brightness)
+	local brightness=$(cat /sys/class/backlight/intel_backlight/brightness)
 	if [ $? -ne 0 ]; then
 		error: "failed to get current brightness"
 	fi
@@ -60,7 +59,7 @@ function current_brightness {
 }
 
 function max_brightness {
-	local max=$(sudo cat /sys/class/backlight/intel_backlight/max_brightness)
+	local max=$(cat /sys/class/backlight/intel_backlight/max_brightness)
 	if [ $? -ne 0 ]; then
 		error: "failed to get max_brightness"
 	fi
@@ -71,11 +70,18 @@ function brightness_increment {
 	echo $((($(max_brightness) / 10) * 2))
 }
 
+function brightness_percentage {
+	local brightness=$(echo "$(current_brightness) / $(max_brightness) * 100" | bc -l)
+	printf "%0.0f%%\n" $brightness
+}
+
 function check_root {
 	if [[ $EUID > 0 ]]; then
 		error "$(basename $0) must be ran as root"
 	fi
 }
+
+command -v bc >/dev/null 2>&1 || error "bc not installed"
 
 case "$1" in
 	dec|decrease)
@@ -85,6 +91,9 @@ case "$1" in
 	inc|increase)
 		check_root
 		increase
+		;;
+	current)
+		brightness_percentage
 		;;
 	*)
 		usage
