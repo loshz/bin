@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 
-set -o errexit
-
-function error {
-	echo ERROR: "$1"
-	exit 1
-}
+set -euo pipefail
 
 function usage {
 	echo "Usage: $(basename $0) [OPTION]"
@@ -29,14 +24,14 @@ function list {
 	echo -e "$(sudo find /etc/openvpn/client/ -name "*.conf" -type f -printf '%P\n' | sed 's/\.[^.]*$//')"
 }
 
-command -v openvpn &> /dev/null || error "required program 'openvpn' not installed"
-
 case "$1" in
 	start)
+		sudo chattr +i /etc/resolv.conf
 		openvpn_client "start" "$2"
 		;;
 	stop)
 		openvpn_client "stop" "$2"
+		sudo chattr -i /etc/resolv.conf
 		;;
 	list)
 		list
