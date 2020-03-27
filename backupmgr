@@ -45,7 +45,7 @@ if [ "${CONFIRM}" != "y" ]; then
 fi
 
 # Create backup dir
-cd /tmp
+cd ${BACKUP_PATH}
 mkdir ${BACKUP_DIR}
 
 echo -e "\n:: Backing up files"
