@@ -26,12 +26,10 @@ function list {
 
 case "$1" in
 	start)
-		sudo chattr +i /etc/resolv.conf
 		openvpn_client "start" "$2"
 		;;
 	stop)
 		openvpn_client "stop" "$2"
-		sudo chattr -i /etc/resolv.conf
 		;;
 	list)
 		list
