@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
 
-function error {
-	echo ERROR: "$1"
-	exit 1
-}
+set -euo pipefail
 
 function usage {
-	echo "Usage: $(basename $0) [OPTION]"
+	echo "Usage: $(basename $0) [OPTION] [DEVICE]"
 	echo "Control headphone settings."
 	echo ""
 	echo "OPTIONS"
@@ -17,56 +14,41 @@ function usage {
 }
 
 function connect {
-	BLUETOOTH=$(sudo systemctl start bluetooth)
-	if [ $? -ne 0 ]; then
-		error "failed to start bluetooth service"
-	fi
+	# start bluetooth service
+	sudo systemctl start bluetooth
 
-	POWER=$(bluetoothctl power on)
-	if [ $? -ne 0 ]; then
-		error "failed to power on bluetooth"
-	fi
+	# power on the bluetooth controller
+	bluetoothctl power on
 
-	DEVICES=$(bluetoothctl paired-devices)
-	if [ $? -ne 0 ]; then
-		error "failed to get paired bluetooth devices"
-	fi
+	# get device id
+	DEVICE=$(bluetoothctl paired-devices | head -n 1 | grep $1 | awk '{print $2}')
 
-	DEVICE=$(echo ${DEVICES} | head -n 1 | awk '{print $2}')
-
-	CONNECT=$(bluetoothctl connect ${DEVICE})
-	if [ $? -ne 0 ]; then
-		error "failed to connect to bluetooth device: ${DEVICE}"
-	fi
+	# connect to device
+	bluetoothctl connect ${DEVICE}
 }
 
 function disconnect {
-	BLUETOOTH=$(sudo systemctl stop bluetooth)
-	if [ $? -ne 0 ]; then
-		error "failed to stop bluetooth service"
-	fi
+	sudo systemctl stop bluetooth
 }
 
 function toggle {
-	BLUETOOTH=$(systemctl is-active bluetooth)
-	if [ $? -ne 0 ]; then
-		connect
+	BLUETOOTH=$(systemctl show -p ActiveState --value bluetooth)
+	if [[ "${BLUETOOTH}" == "inactive" ]]; then
+		connect $1
 	else
 		disconnect
 	fi
 }
 
-command -v bluetoothctl &> /dev/null || error "required program 'bluetoothctl' not installed"
-
 case "$1" in
 	connect)
-		connect
+		connect $2
 		;;
 	disconnect)
 		disconnect
 		;;
 	toggle)
-		toggle
+		toggle $2
 		;;
 	*)
 		usage

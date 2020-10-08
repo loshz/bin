@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-function error {
-	echo ERROR: "$1"
-	exit 1
-}
-
 function usage {
 	echo "Usage: $(basename $0) [OPTION]"
 	echo "Control internal and external display settings."
@@ -29,7 +24,8 @@ function dpi {
 function primary {
 	PRIMARY=$(xrandr | grep "primary" | awk '{print $1}')
 	if [ -z "${PRIMARY}" ]; then
-		error "could not determine primary display"
+		echo "could not determine primary display"
+		exit 1
 	fi
 
 	# check for an external display
@@ -49,6 +45,9 @@ function primary {
 			xrandr --output ${PRIMARY} --off
 		fi
 	fi
+
+	# restart i3
+	i3-msg restart
 }
 
 function list {
@@ -56,8 +55,6 @@ function list {
 		echo $m
 	done
 }
-
-command -v xrandr &> /dev/null || error "required program 'xrandr' not installed"
 
 case "$1" in
 	dpi)

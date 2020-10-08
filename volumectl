@@ -1,43 +1,15 @@
 #!/usr/bin/env bash
 
-set -o errexit
+set -eo pipefail
 
-function error {
-	echo ERROR: "$1"
-	exit 1
-}
+# attempt to get the current sink
+SINK=$(pacmd list-sinks | awk '/* index:/{print $3}')
+if [ -z "${SINK}" ]; then
+	SINK=0
+fi
 
-function getCurrentSink {
-	SINK=$(pacmd list-sinks | awk '/* index:/{print $3}')
-	if [ -z "${SINK}" ]; then
-		error "no sink available"
-	fi
-	echo "${SINK}"
-}
-
-function getCurrentSinkInfo {
-	SINK_INFO=$(pacmd list-sinks | grep -wA 11 "* index: $(getCurrentSink)")
-	if [ -z "${SINK_INFO}" ]; then
-		error "could not get current sink info"
-	fi
-	echo "${SINK_INFO}"
-}
-
-function getVolume {
-	VOLUME=$(echo "$(getCurrentSinkInfo)" | grep "volume:" | head -n 1 | awk '{print $5}' | sed 's/[^0-9]//g')
-	if [ -z "${VOLUME}" ]; then
-		error "could not get current sink volume"
-	fi
-	echo "${VOLUME}"
-}
-
-function getMute {
-	MUTE=$(echo "$(getCurrentSinkInfo)" | grep "muted" | awk '{print $2}')
-	if [ -z "${MUTE}" ]; then
-		error "could not get current sink mute status"
-	fi
-	echo "${MUTE}"
-}
+# attempt to get current sink info
+SINK_INFO=$(pacmd list-sinks | grep -wA 11 "* index: ${SINK}")
 
 function usage {
 	echo "Usage: $(basename $0) [OPTION]..."
@@ -51,61 +23,44 @@ function usage {
 	exit 1
 }
 
+function get_volume {
+	echo "${SINK_INFO}" | grep "volume:" | head -n 1 | awk '{print $5}' | sed 's/[^0-9]//g'
+}
+
 function get {
-	MUTE=$(getMute)
+	MUTE=$(echo "${SINK_INFO}" | grep "muted" | awk '{print $2}')
 	if [ "${MUTE}" == "yes" ]; then
 		echo "mute"
 		exit 0
 	fi
-	echo "$(getVolume)%"
-	exit 0
+	echo "$(get_volume)%"
 }
 
 function increase {
-	VOLUME=$(getVolume)
+	VOLUME=$(get_volume)
 	if [ "${VOLUME}" -gt 90 ]; then
-		INC=$(pactl set-sink-volume $(getCurrentSink) 100%)
+		INC=$(pactl set-sink-volume ${SINK} 100%)
 	else
-		INC=$(pactl set-sink-volume $(getCurrentSink) +10%)
+		INC=$(pactl set-sink-volume ${SINK} +10%)
 	fi
-	
-	if [ $? -ne 0 ]; then
-		error "failed to increase sink volume"
-	fi
-	exit 0
 }
 
 function decrease {
-	VOLUME=$(getVolume)
+	VOLUME=$(get_volume)
 	if [ "${VOLUME}" -lt 10 ]; then
-		INC=$(pactl set-sink-volume $(getCurrentSink) 0%)
+		INC=$(pactl set-sink-volume ${SINK} 0%)
 	else
-		INC=$(pactl set-sink-volume $(getCurrentSink) -10%)
+		INC=$(pactl set-sink-volume ${SINK} -10%)
 	fi
-	
-	if [ $? -ne 0 ]; then
-		error "failed to decrease sink volume"
-	fi
-	exit 0
 }
 
 function unmute {
-	UNMUTE=$(pactl set-sink-mute $(getCurrentSink) 0)
-	if [ $? -ne 0 ]; then
-		error "failed to unmute sink volume"
-	fi
+	pactl set-sink-mute ${SINK} 0
 }
 
 function toggle_mute {
-	MUTE=$(pactl set-sink-mute $(getCurrentSink) toggle)
-	if [ $? -ne 0 ]; then
-		error "failed to mute sink volume"
-	fi
-	exit 0
+	pactl set-sink-mute ${SINK} toggle
 }
-
-command -v pacmd &> /dev/null || error "required program 'pacmd' not installed"
-command -v pactl &> /dev/null || error "required program 'pactl' not installed"
 
 case "$1" in
 	dec|decrease)

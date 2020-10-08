@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -o errexit
+set -e
 
 if [[ -z $1 ]]; then
 	echo "missing block device: $(basename $0) <DEVICE> [-u]"

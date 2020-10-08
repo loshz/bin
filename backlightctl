@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-function error {
-	echo ERROR: "$1"
-	exit 1
-}
+set -eo pipefail
 
 function usage {
 	echo "Usage: $(basename $0) [OPTION]"
@@ -44,26 +41,14 @@ function decrease {
 
 function set_brightness {
 	echo $1 > /sys/class/backlight/intel_backlight/brightness
-	if [ $? -ne 0 ]; then
-		error: "failed to set current brightness"
-	fi
-	exit 0
 }
 
 function current_brightness {
-	local brightness=$(cat /sys/class/backlight/intel_backlight/brightness)
-	if [ $? -ne 0 ]; then
-		error: "failed to get current brightness"
-	fi
-	echo $brightness
+	echo $(cat /sys/class/backlight/intel_backlight/brightness)
 }
 
 function max_brightness {
-	local max=$(cat /sys/class/backlight/intel_backlight/max_brightness)
-	if [ $? -ne 0 ]; then
-		error: "failed to get max_brightness"
-	fi
-	echo $max
+	echo $(cat /sys/class/backlight/intel_backlight/max_brightness)
 }
 
 function brightness_increment {
@@ -77,11 +62,10 @@ function brightness_percentage {
 
 function check_root {
 	if [[ $EUID > 0 ]]; then
-		error "$(basename $0) must be ran as root"
+		echo "$(basename $0) must be ran as root"
+		exit 1
 	fi
 }
-
-command -v bc >/dev/null 2>&1 || error "bc not installed"
 
 case "$1" in
 	dec|decrease)
