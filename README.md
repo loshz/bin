@@ -18,4 +18,4 @@ Basic completion files can be found in the `bash_completion` dir. In order to in
 - `/etc/bash_completion.d/`
 - `~/.bash_completion.d/`
 
-**Note:** The files in this folder must be sourced in your `.bashrc` or `.bash_profile` etc.
+**Note:** The bash completion files must be sourced in your `.bashrc` or `.bash_profile` etc.

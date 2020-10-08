@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -o pipefail
+
 function usage {
 	echo "Usage: $(basename $0) [OPTION]"
 	echo "Control internal and external display settings."
@@ -35,8 +37,10 @@ function primary {
 	OFF=$(xrandr | grep -q "${PRIMARY} connected primary [0-9]")
 	if [ $? -ne 0 ]; then
 		if [ -z "${EXTERNAL}" ]; then
+			# if no external display, turn on primary only
 			xrandr --output ${PRIMARY} --auto --primary
 		else
+			# if external display, turn on primary to left-of external
 			xrandr --output ${PRIMARY} --auto --left-of ${EXTERNAL} --primary
 		fi
 	else
@@ -51,8 +55,8 @@ function primary {
 }
 
 function list {
-	for m in $(xrandr | grep -E "[0-9] connected (primary )?[0-9]" | awk '{print $1}'); do
-		echo $m
+	for display in $(xrandr | grep -E "[0-9] connected (primary )?[0-9]" | awk '{print $1}'); do
+		echo $display
 	done
 }
 
