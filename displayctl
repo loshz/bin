@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 
-set -o pipefail
+set -e
+
+# get the primary display
+PRIMARY=$(xrandr | grep "primary" | awk '{print $1}')
+if [ -z "${PRIMARY}" ]; then
+	echo "could not determine primary display"
+	exit 1
+fi
+
+# check for an external display
+EXTERNAL=$(xrandr | grep "[0-9] connected [0-9]" | awk '{print $1}')
 
 function usage {
 	echo "Usage: $(basename $0) [OPTION]"
@@ -14,8 +24,7 @@ function usage {
 }
 
 function dpi {
-	EXTERNAL=$(xrandr | grep -q "[0-9] connected [0-9]")
-	if [ $? -ne 0 ]; then
+	if [ -z ${EXTERNAL} ]; then
 		XDPI=144
 	else
 		XDPI=96
@@ -24,18 +33,9 @@ function dpi {
 }
 
 function primary {
-	PRIMARY=$(xrandr | grep "primary" | awk '{print $1}')
-	if [ -z "${PRIMARY}" ]; then
-		echo "could not determine primary display"
-		exit 1
-	fi
-
-	# check for an external display
-	EXTERNAL=$(xrandr | grep "[0-9] connected [0-9]" | awk '{print $1}')
-
 	# check if the primary display is off
-	OFF=$(xrandr | grep -q "${PRIMARY} connected primary [0-9]")
-	if [ $? -ne 0 ]; then
+	OFF=$(xrandr | grep "${PRIMARY} connected primary [0-9]" | awk '{print $1}')
+	if [ -z "${OFF}" ]; then
 		if [ -z "${EXTERNAL}" ]; then
 			# if no external display, turn on primary only
 			xrandr --output ${PRIMARY} --auto --primary
