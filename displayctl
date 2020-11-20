@@ -17,19 +17,9 @@ function usage {
 	echo "Control internal and external display settings."
 	echo ""
 	echo "OPTIONS"
-	echo "  dpi         print dpi depending on current monitor."
 	echo "  primary     toggle the primary monitor [on|off]."
 	echo "  list        list currently connected displays."
 	exit 1
-}
-
-function dpi {
-	if [ -z ${EXTERNAL} ]; then
-		XDPI=144
-	else
-		XDPI=96
-	fi
-	echo ${XDPI}
 }
 
 function primary {
@@ -38,10 +28,10 @@ function primary {
 	if [ -z "${OFF}" ]; then
 		if [ -z "${EXTERNAL}" ]; then
 			# if no external display, turn on primary only
-			xrandr --output ${PRIMARY} --auto --primary
+			xrandr --output ${PRIMARY} --auto --primary --output ${EXTERNAL} --off
 		else
 			# if external display, turn on primary to left-of external
-			xrandr --output ${PRIMARY} --auto --left-of ${EXTERNAL} --primary
+			xrandr --output ${PRIMARY} --primary --auto --left-of ${EXTERNAL}
 		fi
 	else
 		# only turn off primary display if external is connected
@@ -61,9 +51,6 @@ function list {
 }
 
 case "$1" in
-	dpi)
-		dpi
-		;;
 	primary)
 		primary
 		;;

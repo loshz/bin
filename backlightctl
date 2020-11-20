@@ -40,15 +40,15 @@ function decrease {
 }
 
 function set_brightness {
-	echo $1 > /sys/class/backlight/intel_backlight/brightness
+	echo $1 > /sys/class/backlight/amdgpu_bl0/brightness
 }
 
 function current_brightness {
-	echo $(cat /sys/class/backlight/intel_backlight/brightness)
+	echo $(cat /sys/class/backlight/amdgpu_bl0/brightness)
 }
 
 function max_brightness {
-	echo $(cat /sys/class/backlight/intel_backlight/max_brightness)
+	echo $(cat /sys/class/backlight/amdgpu_bl0/max_brightness)
 }
 
 function brightness_increment {
