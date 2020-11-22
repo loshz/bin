@@ -52,7 +52,7 @@ echo -e "\n:: Backing up files"
 DIRS=(/home /etc /usr /boot)
 for DIR in ${DIRS[@]}; do
 	echo -ne "${DIR}..."
-	rsync -aqE --relative --exclude ".cache" --exclude ".sock" --exclude "lost+found" ${DIR} ${BACKUP_DIR}
+	rsync -aqE --relative --exclude ".cache" --exclude ".sock" --exclude "lost+found" --exclude ".local/share/Steam" ${DIR} ${BACKUP_DIR}
 	echo -ne "ok\r\n"
 done
 
