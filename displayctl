@@ -3,59 +3,38 @@
 set -e
 
 # get the primary display
-PRIMARY=$(xrandr | grep "primary" | awk '{print $1}')
+PRIMARY=$(xrandr | grep "^eDP-[0-9] connected" | awk '{print $1}')
 if [ -z "${PRIMARY}" ]; then
 	echo "could not determine primary display"
 	exit 1
 fi
 
 # check for an external display
-EXTERNAL=$(xrandr | grep "[0-9] connected [0-9]" | awk '{print $1}')
+EXTERNAL=$(xrandr | grep "^DP-[0-9] connected" | awk '{print $1}')
 
 function usage {
 	echo "Usage: $(basename $0) [OPTION]"
 	echo "Control internal and external display settings."
 	echo ""
 	echo "OPTIONS"
-	echo "  primary     toggle the primary monitor [on|off]."
-	echo "  list        list currently connected displays."
+	echo "  both       turn both primary and extarnal displays on"
+	echo "  primary    turn on primary display only"
+	echo "  external   turn on external display only"
 	exit 1
 }
 
-function primary {
-	# check if the primary display is off
-	OFF=$(xrandr | grep "${PRIMARY} connected primary [0-9]" | awk '{print $1}')
-	if [ -z "${OFF}" ]; then
-		if [ -z "${EXTERNAL}" ]; then
-			# if no external display, turn on primary only
-			xrandr --output ${PRIMARY} --auto --primary --output ${EXTERNAL} --off
-		else
-			# if external display, turn on primary to left-of external
-			xrandr --output ${PRIMARY} --primary --auto --left-of ${EXTERNAL}
-		fi
-	else
-		# only turn off primary display if external is connected
-		if [ ! -z "${EXTERNAL}" ]; then
-			xrandr --output ${PRIMARY} --off
-		fi
-	fi
-
-	# restart i3
-	i3-msg restart
-}
-
-function list {
-	for display in $(xrandr | grep -E "[0-9] connected (primary )?[0-9]" | awk '{print $1}'); do
-		echo $display
-	done
-}
-
 case "$1" in
-	primary)
-		primary
+	both)
+		xrandr --output ${PRIMARY} --primary --auto --left-of ${EXTERNAL} --output ${EXTERNAL} --auto
+		i3-msg restart
 		;;
-	list)
-		list
+	primary)
+		xrandr --output ${PRIMARY} --auto --primary --output ${EXTERNAL} --auto --off
+		i3-msg restart
+		;;
+	external)
+		xrandr --output ${PRIMARY} --off --output ${EXTERNAL} --auto --primary
+		i3-msg restart
 		;;
 	*)
 		usage
