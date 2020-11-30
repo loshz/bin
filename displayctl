@@ -17,26 +17,26 @@ function usage {
 	echo "Control internal and external display settings."
 	echo ""
 	echo "OPTIONS"
-	echo "  both       turn both primary and extarnal displays on"
+	echo "  dual       turn both primary and extarnal displays on"
 	echo "  primary    turn on primary display only"
 	echo "  external   turn on external display only"
 	exit 1
 }
 
 case "$1" in
-	both)
+	dual)
 		xrandr --output ${PRIMARY} --primary --auto --left-of ${EXTERNAL} --output ${EXTERNAL} --auto
-		i3-msg restart
 		;;
 	primary)
 		xrandr --output ${PRIMARY} --auto --primary --output ${EXTERNAL} --auto --off
-		i3-msg restart
 		;;
 	external)
 		xrandr --output ${PRIMARY} --off --output ${EXTERNAL} --auto --primary
-		i3-msg restart
 		;;
 	*)
 		usage
 		;;
 esac
+
+# restart i3 on display update
+i3-msg restart

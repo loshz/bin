@@ -1,5 +1,5 @@
 # displayctl(1) completion                                   -*- shell-script -*-
 
-complete -W "both primary external" displayctl
+complete -W "dual primary external" displayctl
 
 # ex: filetype=sh
