@@ -13,13 +13,16 @@ fi
 EXTERNAL=$(xrandr | grep -E "^(DP|HDMI)-[0-9] connected" | head -n1 | awk '{print $1}')
 
 function usage {
-	echo "Usage: $(basename $0) [OPTION]"
-	echo "Control internal and external display settings."
+	echo "$(basename $0)"
+	echo "Control internal and external display output"
 	echo ""
-	echo "OPTIONS"
-	echo "  dual       turn both primary and extarnal displays on"
-	echo "  primary    turn on primary display only"
-	echo "  external   turn on external display only"
+	echo "USAGE:"
+	echo "    $(basename $0) [OPTION]"
+	echo ""
+	echo "OPTIONS:"
+	echo "    dual       turn both primary and extarnal displays on"
+	echo "    primary    turn on primary display only"
+	echo "    external   turn on external display only"
 	exit 1
 }
 

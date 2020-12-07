@@ -2,7 +2,6 @@
 
 A collection of scripts used across my Linux machines.
 
-- `backlightctl`: control the intel_backlight brightness.
 - `backupmgr`: creates an archive of specific files/directories.
 - `displayctl`: control internal and external display settings.
 - `emount`: open and mount LUKS encrypted drives.
