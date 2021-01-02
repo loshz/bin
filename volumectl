@@ -11,20 +11,22 @@ fi
 # attempt to get current sink info
 SINK_INFO=$(pacmd list-sinks | grep -wA 11 "* index: ${SINK}")
 
+# attempt to get current volume
+CURRENT_VOL=$(echo "${SINK_INFO}" | grep "volume:" | head -n 1 | awk '{print $5}' | sed 's/[^0-9]//g')
+
 function usage {
-	echo "Usage: $(basename $0) [OPTION]..."
-	echo "Control and get the volume of the current sink."
+	echo "$(basename "$0") 0.1.0"
+	echo "Control and get the volume of the current sink"
 	echo ""
-	echo "Available OPTIONs:"
-	echo "  get         get the volume of the current sink."
+	echo "USAGE:"
+	echo "    $(basename "$0") [OPTION]"
+	echo ""
+	echo "OPTIONS:"
+	echo "  get         get the volume of the current sink"
 	echo "  increase    increase the volume of the current sink +10%"
 	echo "  decrease    decrease the volume of the current sink -10%"
 	echo "  mute        toggle the volume of the current sink"
 	exit 1
-}
-
-function get_volume {
-	echo "${SINK_INFO}" | grep "volume:" | head -n 1 | awk '{print $5}' | sed 's/[^0-9]//g'
 }
 
 function get {
@@ -33,24 +35,22 @@ function get {
 		echo "mute"
 		exit 0
 	fi
-	echo "$(get_volume)%"
+	echo "${CURRENT_VOL}%"
 }
 
 function increase {
-	VOLUME=$(get_volume)
-	if [ "${VOLUME}" -gt 90 ]; then
-		INC=$(pactl set-sink-volume ${SINK} 100%)
+	if [ "${CURRENT_VOL}" -gt 90 ]; then
+		pactl set-sink-volume "${SINK}" 100%
 	else
-		INC=$(pactl set-sink-volume ${SINK} +10%)
+		pactl set-sink-volume "${SINK}" +10%
 	fi
 }
 
 function decrease {
-	VOLUME=$(get_volume)
-	if [ "${VOLUME}" -lt 10 ]; then
-		INC=$(pactl set-sink-volume ${SINK} 0%)
+	if [ "${CURRENT_VOL}" -lt 10 ]; then
+		pactl set-sink-volume "${SINK}" 0%
 	else
-		INC=$(pactl set-sink-volume ${SINK} -10%)
+		pactl set-sink-volume "${SINK}" -10%
 	fi
 }
 

@@ -3,7 +3,7 @@
 set -e
 
 if [[ -z $1 ]]; then
-	echo "missing block device: $(basename $0) <DEVICE> [-u]"
+	echo "missing block device, try: $(basename "$0") <DEVICE> [-u]"
 	exit 1
 fi
 
@@ -12,10 +12,10 @@ UMNT=$2
 PART=${DEV##*/}
 
 if [[ ${UMNT} == "-u" ]]; then
-	umount /dev/mapper/${PART}
-	cryptsetup luksClose ${PART}
+	umount /dev/mapper/"${PART}"
+	cryptsetup luksClose "${PART}"
 	exit 0
 fi
 
-cryptsetup luksOpen ${DEV} ${PART}
-mount /dev/mapper/${PART} /mnt
+cryptsetup luksOpen "${DEV}" "${PART}"
+mount /dev/mapper/"${PART}" /mnt

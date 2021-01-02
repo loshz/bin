@@ -3,13 +3,16 @@
 set -euo pipefail
 
 function usage {
-	echo "Usage: $(basename $0) [OPTION] [DEVICE]"
-	echo "Control headphone settings."
+	echo "$(basename "$0") 0.1.0"
+	echo "Control headphone settings"
 	echo ""
-	echo "OPTIONS"
-	echo "  connnect       start bluetooth service and connect headphones."
-	echo "  disconnect     disconnect headphones and stop bluetooth service."
-	echo "  toggle         toggle headphone connection based on bluetooth service."
+	echo "USAGE:"
+	echo "    $(basename "$0") [OPTION]"
+	echo ""
+	echo "OPTIONS:"
+	echo "  connnect       start bluetooth service and connect headphones"
+	echo "  disconnect     disconnect headphones and stop bluetooth service"
+	echo "  toggle         toggle headphone connection based on bluetooth service"
 	exit 1
 }
 
@@ -21,10 +24,10 @@ function connect {
 	bluetoothctl power on
 
 	# get device id
-	DEVICE=$(bluetoothctl paired-devices | head -n 1 | grep $1 | awk '{print $2}')
+	DEVICE=$(bluetoothctl paired-devices | head -n 1 | grep "$1" | awk '{print $2}')
 
 	# connect to device
-	bluetoothctl connect ${DEVICE}
+	bluetoothctl connect "${DEVICE}"
 }
 
 function disconnect {
@@ -34,7 +37,7 @@ function disconnect {
 function toggle {
 	BLUETOOTH=$(systemctl show -p ActiveState --value bluetooth)
 	if [[ "${BLUETOOTH}" == "inactive" ]]; then
-		connect $1
+		connect "$1"
 	else
 		disconnect
 	fi
@@ -42,13 +45,13 @@ function toggle {
 
 case "$1" in
 	connect)
-		connect $2
+		connect "$2"
 		;;
 	disconnect)
 		disconnect
 		;;
 	toggle)
-		toggle $2
+		toggle "$2"
 		;;
 	*)
 		usage
