@@ -3,11 +3,11 @@
 set -euo pipefail
 
 function usage {
-	echo "$(basename "$0") 0.1.0"
+	echo "$(basename "$0") 0.1.1"
 	echo "Control headphone settings"
 	echo ""
 	echo "USAGE:"
-	echo "    $(basename "$0") [OPTION]"
+	echo "    $(basename "$0") [OPTION] <device>"
 	echo ""
 	echo "OPTIONS:"
 	echo "  connnect       start bluetooth service and connect headphones"
