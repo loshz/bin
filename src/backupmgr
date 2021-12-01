@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+set -e
+
+function usage {
+	echo "Usage: $(basename $0) [BACKUP PATH] [FILENAME]"
+	echo "Backup files to an externally mounted volume."
+	echo ""
+	echo "Required params:"
+	echo "  [BACKUP PATH]    Full path to externally mounted volume (e.g. /mnt/Backups)"
+	echo ""
+	echo "Optional params:"
+	echo "  [FILENAME]       Name of backup file (default: backup-[HOSTNAME]-[TIMESTAMP].tar.gz"
+	exit 1
+}
+
+if [[ $EUID > 0 ]]; then
+	echo "$(basename $0) must be ran as root"
+	exit 1
+fi
+
+BACKUP_PATH=$1
+BACKUP_DIR=$2
+
+# Check backup path is set
+if [[ -z ${BACKUP_PATH} ]] || [[ ! -d "${BACKUP_PATH}" ]]; then
+	usage
+fi
+
+# Check for user specified backup filename
+if [[ -z ${BACKUP_DIR} ]]; then
+	BACKUP_DIR="$HOSTNAME-$(date "+%Y%m%d-%H%M%S")"
+fi
+
+# Check backup file does not already exist
+if [[ -f "${BACKUP_PATH}/${BACKUP_DIR}" ]]; then
+	echo "backup '${BACKUP_PATH}/${BACKUP_DIR}' already exists"
+	exit 1
+fi
+
+echo "Will create backup ${BACKUP_PATH}/${BACKUP_DIR}.tar.gz"
+read -p ":: Proceed? [y/N] " CONFIRM
+if [ "${CONFIRM}" != "y" ]; then
+	exit 1
+fi
+
+# Create backup dir
+cd ${BACKUP_PATH}
+mkdir ${BACKUP_DIR}
+
+echo -e "\n:: Backing up files"
+DIRS=(/home /etc /usr /boot)
+for DIR in ${DIRS[@]}; do
+	echo -ne "${DIR}..."
+	rsync -aqE --relative --exclude ".cache" --exclude ".sock" --exclude "lost+found" --exclude ".local/share/Steam" ${DIR} ${BACKUP_DIR}
+	echo -ne "ok\r\n"
+done
+
+echo -e "\n:: Running tasks"
+# Export list of installed packages
+echo -ne "Exporting pkglist..."
+pacman -Qqet > ${BACKUP_DIR}/pkglist.txt
+echo -ne "ok\r\n"
+
+# Archive backup dir
+echo -e "\n:: Creating archive"
+echo -ne "tar..."
+tar -zcf ${BACKUP_PATH}/${BACKUP_DIR}.tar.gz ${BACKUP_DIR}
+echo -ne "ok\r\n"
+
+# Remove backup dir
+rm -r ${BACKUP_DIR}
+
+echo -e "\nBackup complete"

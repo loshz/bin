@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+function usage {
+	echo "$(basename "$0") 0.1.0"
+	echo "Control OpenVPN client profiles"
+	echo ""
+	echo "USAGE:"
+	echo "    $(basename "$0") [OPTION] <PROFILE>"
+	echo ""
+	echo "OPTIONS:"
+	echo "  start <PROFILE>   start the openvpn client with a given profile"
+	echo "  stop  <PROFILE>   stop the openvpn client for a given profile"
+	echo "  list              list all openvpn client profiles"
+	exit 1
+}
+
+function openvpn_client {
+	if [[ -z "$2" ]]; then
+		usage
+	fi
+	sudo systemctl "$1" openvpn-client@"$2"
+}
+
+function list {
+	echo -e "$(sudo find /etc/openvpn/client/ -name "*.conf" -type f -printf '%P\n' | sed 's/\.[^.]*$//')"
+}
+
+case "$1" in
+	start)
+		openvpn_client "start" "$2"
+		;;
+	stop)
+		openvpn_client "stop" "$2"
+		;;
+	list)
+		list
+		;;
+	*)
+		usage
+		;;
+esac

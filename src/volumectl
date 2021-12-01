@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+# attempt to get the current sink
+SINK=$(pacmd list-sinks | awk '/* index:/{print $3}')
+if [ -z "${SINK}" ]; then
+	SINK=0
+fi
+
+# attempt to get current sink info
+SINK_INFO=$(pacmd list-sinks | grep -wA 11 "* index: ${SINK}")
+
+# attempt to get current volume
+CURRENT_VOL=$(echo "${SINK_INFO}" | grep "volume:" | head -n 1 | awk '{print $5}' | sed 's/[^0-9]//g')
+
+function usage {
+	echo "$(basename "$0") 0.1.0"
+	echo "Control and get the volume of the current sink"
+	echo ""
+	echo "USAGE:"
+	echo "    $(basename "$0") [OPTION]"
+	echo ""
+	echo "OPTIONS:"
+	echo "  get         get the volume of the current sink"
+	echo "  increase    increase the volume of the current sink +10%"
+	echo "  decrease    decrease the volume of the current sink -10%"
+	echo "  mute        toggle the volume of the current sink"
+	exit 1
+}
+
+function get {
+	MUTE=$(echo "${SINK_INFO}" | grep "muted" | awk '{print $2}')
+	if [ "${MUTE}" == "yes" ]; then
+		echo "mute"
+		exit 0
+	fi
+	echo "${CURRENT_VOL}%"
+}
+
+function increase {
+	if [ "${CURRENT_VOL}" -gt 90 ]; then
+		pactl set-sink-volume "${SINK}" 100%
+	else
+		pactl set-sink-volume "${SINK}" +10%
+	fi
+}
+
+function decrease {
+	if [ "${CURRENT_VOL}" -lt 10 ]; then
+		pactl set-sink-volume "${SINK}" 0%
+	else
+		pactl set-sink-volume "${SINK}" -10%
+	fi
+}
+
+function unmute {
+	pactl set-sink-mute ${SINK} 0
+}
+
+function toggle_mute {
+	pactl set-sink-mute ${SINK} toggle
+}
+
+case "$1" in
+	dec|decrease)
+		unmute
+		decrease
+		;;
+	get)
+		get
+		;;
+	inc|increase)
+		unmute
+		increase
+		;;
+	mute)
+		toggle_mute
+		;;
+	*)
+		usage
+		;;
+esac
