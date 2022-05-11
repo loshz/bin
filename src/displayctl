@@ -5,7 +5,7 @@ set -e
 # get the primary display
 PRIMARY=$(xrandr | grep "^eDP-[0-9] connected" | awk '{print $1}')
 if [ -z "${PRIMARY}" ]; then
-	echo "could not determine primary display"
+	echo "error: could not determine primary display"
 	exit 1
 fi
 
@@ -29,7 +29,7 @@ function usage {
 function dual {
 	# if no external display, fail
 	if [ -z "${EXTERNAL}" ]; then
-		echo "could not determine external display"
+		echo "error: could not determine external display"
 		exit 1
 	fi
 
@@ -51,7 +51,7 @@ function primary {
 function external {
 	# if no external display, fail
 	if [ -z "${EXTERNAL}" ]; then
-		echo "could not determine external display"
+		echo "error: could not determine external display"
 		exit 1
 	fi
 

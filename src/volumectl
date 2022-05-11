@@ -2,14 +2,7 @@
 
 set -eo pipefail
 
-# attempt to get the current sink
-SINK=$(pactl get-default-sink)
-if [ -z "${SINK}" ]; then
-	SINK=0
-fi
-
-# attempt to get current volume
-CURRENT_VOL=$(pactl get-sink-volume ${SINK} | head -n 1 | awk '{print $5}' | sed 's/[^0-9]//g')
+CURRENT_VOL=$(pactl get-sink-volume @DEFAULT_SINK@ | head -n 1 | awk '{print $5}' | sed 's/[^0-9]//g')
 
 function usage {
 	echo "$(basename "$0") 0.1.0"
@@ -19,44 +12,45 @@ function usage {
 	echo "    $(basename "$0") [OPTION]"
 	echo ""
 	echo "OPTIONS:"
-	echo "  get         get the volume of the current sink"
-	echo "  increase    increase the volume of the current sink +10%"
-	echo "  decrease    decrease the volume of the current sink -10%"
-	echo "  mute        toggle the volume of the current sink"
+	echo "  get             get the volume of the current sink"
+	echo "  inc|increase    increase the volume of the current sink +10%"
+	echo "  dec|decrease    decrease the volume of the current sink -10%"
+	echo "  mute            toggle the volume of the current sink"
 	exit 1
 }
 
 function get {
-	MUTE=$(pactl get-sink-mute ${SINK} | awk '{print $2}')
+	MUTE=$(pactl get-sink-mute @DEFAULT_SINK@ | awk '{print $2}')
 	if [ "${MUTE}" == "yes" ]; then
 		echo "mute"
 		exit 0
 	fi
+
 	echo "${CURRENT_VOL}%"
 }
 
 function increase {
 	if [ "${CURRENT_VOL}" -gt 90 ]; then
-		pactl set-sink-volume "${SINK}" 100%
+		pactl set-sink-volume @DEFAULT_SINK@ 100%
 	else
-		pactl set-sink-volume "${SINK}" +10%
+		pactl set-sink-volume @DEFAULT_SINK@ +10%
 	fi
 }
 
 function decrease {
 	if [ "${CURRENT_VOL}" -lt 10 ]; then
-		pactl set-sink-volume "${SINK}" 0%
+		pactl set-sink-volume @DEFAULT_SINK@ 0%
 	else
-		pactl set-sink-volume "${SINK}" -10%
+		pactl set-sink-volume @DEFAULT_SINK@ -10%
 	fi
 }
 
 function unmute {
-	pactl set-sink-mute ${SINK} 0
+	pactl set-sink-mute @DEFAULT_SINK@ 0
 }
 
 function toggle_mute {
-	pactl set-sink-mute ${SINK} toggle
+	pactl set-sink-mute @DEFAULT_SINK@ toggle
 }
 
 case "$1" in

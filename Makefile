@@ -6,7 +6,7 @@ install: ./src/*
 
 .PHONY: bash-completion
 bash-completion: ./bash_completion/*
-	mkdir -p /etc/bash_completion.d
+	sudo mkdir -p /etc/bash_completion.d
 	for file in $^; do\
 		sudo ln -sv $(PWD)/$$file /etc/bash_completion.d/;\
 	done
