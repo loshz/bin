@@ -3,8 +3,8 @@
 set -eo pipefail
 
 function usage {
-	echo "$(basename "$0") 0.1.1"
-	echo "Control headphone settings"
+	echo "$(basename "$0") 0.2.0"
+	echo "Control bluetooth headphone settings."
 	echo ""
 	echo "USAGE:"
 	echo "    $(basename "$0") [OPTION] <device>"
@@ -16,29 +16,29 @@ function usage {
 	exit 1
 }
 
-DEVICE="$2"
-
 function connect {
-	# start bluetooth service
-	sudo systemctl start bluetooth
-
-	# power on the bluetooth controller
+	# Power on the bluetooth controller.
 	bluetoothctl power on
 
-	# get device id
-	DEVICE=$(bluetoothctl paired-devices | head -n 1 | grep "$1" | awk '{print $2}')
+	# Get device id.
+	DEVICE=$(bluetoothctl devices Paired | head -n 1 | grep "$1" | awk '{print $2}')
 
-	# connect to device
+	# Connect to device.
 	bluetoothctl connect "${DEVICE}"
 }
 
 function disconnect {
-	sudo systemctl stop bluetooth
+	# Power off the bluetooth controller.
+	bluetoothctl power off
 }
 
 function toggle {
-	BLUETOOTH=$(systemctl show -p ActiveState --value bluetooth)
-	if [[ "${BLUETOOTH}" == "inactive" ]]; then
+	# Get device id.
+	DEVICE=$(bluetoothctl devices Paired | head -n 1 | grep "$1" | awk '{print $2}')
+
+	# Check if current device is already connected.
+	CONNECTED=$(bluetoothctl info "${DEVICE}" | grep "Connected:" | awk '{print $2}')
+	if [[ "${CONNECTED}" == "no" ]]; then
 		connect "$1"
 	else
 		disconnect
