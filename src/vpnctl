@@ -1,38 +1,45 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -eo pipefail
 
 function usage {
-	echo "$(basename "$0") 0.1.0"
-	echo "Control OpenVPN client profiles"
+	echo "$(basename "$0") 0.2.0"
+	echo "Control WireGuard profiles"
 	echo ""
 	echo "USAGE:"
-	echo "    $(basename "$0") [OPTION] <PROFILE>"
+	echo "    $(basename "$0") [OPTION] <CONFIG>"
 	echo ""
 	echo "OPTIONS:"
-	echo "  start <PROFILE>   start the openvpn client with a given profile"
-	echo "  stop  <PROFILE>   stop the openvpn client for a given profile"
-	echo "  list              list all openvpn client profiles"
+	echo "  up <CONFIG>      start the WireGuard client with a given config"
+	echo "  down <CONFIG>    stop the WireGuard client for a given config"
+	echo "  list             list all WireGuard client configs"
 	exit 1
 }
 
-function openvpn_client {
+function wg_client {
 	if [[ -z "$2" ]]; then
 		usage
 	fi
-	sudo systemctl "$1" openvpn-client@"$2"
+	sudo wg-quick "$1" "$2"
 }
 
 function list {
-	echo -e "$(sudo find /etc/openvpn/client/ -name "*.conf" -type f -printf '%P\n' | sed 's/\.[^.]*$//')"
+	for prof in $(sudo find /etc/wireguard/ -name "*.conf" -type f -printf '%P\n' | sed 's/\.[^.]*$//')
+	do
+		if ip link | grep -q "$prof"
+		then
+			prof="$prof (active)"
+		fi
+		echo "$prof"
+	done
 }
 
 case "$1" in
-	start)
-		openvpn_client "start" "$2"
+	up)
+		wg_client "up" "$2"
 		;;
-	stop)
-		openvpn_client "stop" "$2"
+	down)
+		wg_client "down" "$2"
 		;;
 	list)
 		list
