@@ -3,7 +3,7 @@
 set -eo pipefail
 
 function usage {
-	echo "$(basename "$0") 0.2.0"
+	echo "$(basename "$0") 0.3.0"
 	echo "Control WireGuard profiles"
 	echo ""
 	echo "USAGE:"
@@ -11,16 +11,21 @@ function usage {
 	echo ""
 	echo "OPTIONS:"
 	echo "  up <CONFIG>      start the WireGuard client with a given config"
-	echo "  down <CONFIG>    stop the WireGuard client for a given config"
+	echo "  down             stop the WireGuard client"
 	echo "  list             list all WireGuard client configs"
 	exit 1
 }
 
-function wg_client {
-	if [[ -z "$2" ]]; then
+function wg_up {
+	if [[ -z "$1" ]]; then
 		usage
 	fi
-	sudo wg-quick "$1" "$2"
+	
+	# Copy the desired config to wg0 so we can reference a single interface: ip link
+	sudo cp /etc/wireguard/"$1".conf /etc/wireguard/wg0.conf
+
+	# Connect to the server.
+	sudo wg-quick up wg0
 }
 
 function list {
@@ -36,10 +41,10 @@ function list {
 
 case "$1" in
 	up)
-		wg_client "up" "$2"
+		wg_up "$2"
 		;;
 	down)
-		wg_client "down" "$2"
+		sudo wg-quick down wg0
 		;;
 	list)
 		list
