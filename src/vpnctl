@@ -20,7 +20,7 @@ function wg_up {
 	if [[ -z "$1" ]]; then
 		usage
 	fi
-	
+
 	# Copy the desired config to wg0 so we can reference a single interface: ip link
 	sudo cp /etc/wireguard/"$1".conf /etc/wireguard/wg0.conf
 
@@ -29,7 +29,14 @@ function wg_up {
 }
 
 function list {
-	for prof in $(sudo find /etc/wireguard/ -name "*.conf" -type f -printf '%P\n' | sed 's/\.[^.]*$//')
+	local profiles=$(sudo find /etc/wireguard/ -name "*.conf" -type f -printf '%P\n' | sed 's/\.[^.]*$//')
+
+	if [[ -z "$profiles" ]]; then
+		echo "No profiles installed."
+		exit 0
+	fi
+
+	for prof in $profiles
 	do
 		if ip link | grep -q "$prof"
 		then
