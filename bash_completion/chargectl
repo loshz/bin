@@ -1,0 +1,5 @@
+# chargectl(1) completion                                   -*- shell-script -*-
+
+complete -W "threshold fullcharge" chargectl
+
+# ex: filetype=sh
